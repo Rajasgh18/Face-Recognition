@@ -1,77 +1,100 @@
-import { useEffect, useState } from "react";
-import "./app.css";
-import Navbar from "./components/Navbar";
-import NewPost from "./components/NewPost";
+import {
+  Routes,
+  Route,
+  useNavigationType,
+  useLocation,
+} from "react-router-dom";
+import FrameComponent8 from "./pages/FrameComponent8";
+import FrameComponent from "./pages/FrameComponent";
+import FrameComponent1 from "./pages/FrameComponent1";
+import FrameComponent2 from "./pages/FrameComponent2";
+import FrameComponent3 from "./pages/FrameComponent3";
+import FrameComponent4 from "./pages/FrameComponent4";
+import FrameComponent5 from "./pages/FrameComponent5";
+import FrameComponent6 from "./pages/FrameComponent6";
+import FrameComponent7 from "./pages/FrameComponent7";
+import { useEffect } from "react";
 
 function App() {
-  const [file, setFile] = useState();
-  const [image, setImage] = useState();
+  const action = useNavigationType();
+  const location = useLocation();
+  const pathname = location.pathname;
 
   useEffect(() => {
-    const getImage = () => {
-      const img = new Image();
-      img.src = URL.createObjectURL(file);
-      img.onload = () => {
-        setImage({
-          url: img.src,
-          width: img.width,
-          height: img.height,
-        });
-      };
-    };
+    if (action !== "POP") {
+      window.scrollTo(0, 0);
+    }
+  }, [action, pathname]);
 
-    file && getImage();
-  }, [file]);
+  useEffect(() => {
+    let title = "";
+    let metaDescription = "";
+
+    switch (pathname) {
+      case "/":
+        title = "";
+        metaDescription = "";
+        break;
+      case "/frame-118":
+        title = "";
+        metaDescription = "";
+        break;
+      case "/frame-117":
+        title = "";
+        metaDescription = "";
+        break;
+      case "/frame-116":
+        title = "";
+        metaDescription = "";
+        break;
+      case "/frame-115":
+        title = "";
+        metaDescription = "";
+        break;
+      case "/frame-114":
+        title = "";
+        metaDescription = "";
+        break;
+      case "/frame-113":
+        title = "";
+        metaDescription = "";
+        break;
+      case "/frame-112":
+        title = "";
+        metaDescription = "";
+        break;
+      case "/frame-111":
+        title = "";
+        metaDescription = "";
+        break;
+    }
+
+    if (title) {
+      document.title = title;
+    }
+
+    if (metaDescription) {
+      const metaDescriptionTag = document.querySelector(
+        'head > meta[name="description"]'
+      );
+      if (metaDescriptionTag) {
+        metaDescriptionTag.content = metaDescription;
+      }
+    }
+  }, [pathname]);
 
   return (
-    <div>
-      <Navbar />
-      {image ? (
-        <NewPost image={image} />
-      ) : (
-        <div className="newPostCard">
-          <div className="addPost">
-            <img
-              src="https://images.pexels.com/photos/9371782/pexels-photo-9371782.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500"
-              alt=""
-              className="avatar"
-            />
-            <div className="postForm">
-              <input
-                type="text"
-                placeholder="What's on your mind?"
-                className="postInput"
-              />
-              <label htmlFor="file">
-                <img
-                  className="addImg"
-                  src="https://cdn.icon-icons.com/icons2/564/PNG/512/Add_Image_icon-icons.com_54218.png"
-                  alt=""
-                />
-                <img
-                  className="addImg"
-                  src="https://icon-library.com/images/maps-icon-png/maps-icon-png-5.jpg"
-                  alt=""
-                />
-                <img
-                  className="addImg"
-                  src="https://d29fhpw069ctt2.cloudfront.net/icon/image/84451/preview.svg"
-                  alt=""
-                />
-                <button>Send</button>
-              </label>
-              <input
-                onChange={(e) => setFile(e.target.files[0])}
-                id="file"
-                style={{ display: "none" }}
-                type="file"
-              />
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+    <Routes>
+      <Route path="/" element={<FrameComponent8 />} />
+      <Route path="/frame-118" element={<FrameComponent />} />
+      <Route path="/frame-117" element={<FrameComponent1 />} />
+      <Route path="/frame-116" element={<FrameComponent2 />} />
+      <Route path="/frame-115" element={<FrameComponent3 />} />
+      <Route path="/frame-114" element={<FrameComponent4 />} />
+      <Route path="/frame-113" element={<FrameComponent5 />} />
+      <Route path="/frame-112" element={<FrameComponent6 />} />
+      <Route path="/frame-111" element={<FrameComponent7 />} />
+    </Routes>
   );
 }
-
 export default App;
