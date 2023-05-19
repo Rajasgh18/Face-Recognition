@@ -11,16 +11,10 @@ const FrameComponent2 = () => {
   const frameDropdownOpen = Boolean(frameDropdownAnchorEl);
 
   const [image, setImage] = useState(null);
-  const [webcamProcessed, setWebcamProcessed] = useState(null);
-  const [imageChecked, setImageChecked] = useState(null);
-  const [timestamps, setTimestamps] = useState([]);
+  // const [webcamProcessed, setWebcamProcessed] = useState(null);
+  // const [imageChecked, setImageChecked] = useState(null);
+  // const [timestamps, setTimestamps] = useState([]);
 
-  const handleFrameDropdownClick = (event) => {
-    setFrameDropdownAnchorEl(event.currentTarget);
-  };
-  const handleFrameDropdownClose = () => {
-    setFrameDropdownAnchorEl(null);
-  };
 
   const onFACERECOGNITIONClick = useCallback(() => {
     navigate("/");
@@ -31,10 +25,10 @@ const FrameComponent2 = () => {
   }, [navigate]);
 
 
-  const storeWebcamEncoding = async () => {
-    const res = await axios.get('http://localhost:5000/realtime');
-    res.data === 'success' ? setWebcamProcessed(true) : setWebcamProcessed(false);
-  }
+  // const storeWebcamEncoding = async () => {
+  //   const res = await axios.get('http://localhost:5000/realtime');
+  //   res.data === 'success' ? setWebcamProcessed(true) : setWebcamProcessed(false);
+  // }
 
   useEffect(() => {
     const storeImage = async () => {
@@ -63,25 +57,25 @@ const FrameComponent2 = () => {
       </video>
       <div className="absolute top-[168px] left-[29px] w-[838px] h-[780.35px]">
         <div className="absolute top-[240px] left-[1px] w-[837px] h-[419.35px]">
-          <div className="mr-20 flex">
-            <div className="mx-10 flex items-center">
+          <div className="ml-72 flex">
+            {/* <div className="mx-10 flex items-center">
               <button onClick={storeWebcamEncoding} className="bg-dodgerblue m-4 cursor-pointer text-white p-4 rounded-xl shadow-[0px_16px_25px_rgba(0,_0,_0,_0.1)]">Open Webcam</button>
               <span className="mr-4">{webcamProcessed ? "Data Processed" : "No Data processed"}</span>
               {webcamProcessed !== null ? webcamProcessed ? <TiTick className="h-14 w-14 fill-green-400" /> : <TiTimes className="h-14 w-14 fill-red-400" /> : ""}
-            </div>
+            </div> */}
             <div className="flex items-center">
               <input style={{ display: "none" }} id="realtime_detection_image" type="file" onChange={(e) => { setImage(e.target.files[0]) }} />
               <label htmlFor="realtime_detection_image" className="bg-dodgerblue m-4 cursor-pointer text-white p-4 rounded-xl shadow-[0px_16px_25px_rgba(0,_0,_0,_0.1)]">Select Image</label>
               <span>{image ? image.name : "No Image Selected"}</span>
             </div>
           </div>
-          <div className="mt-10 ml-14 text-xl font-medium">
+          {/* <div className="mt-10 ml-14 text-xl font-medium">
             Detected at these timings of the Video : 
             {imageChecked !== null ? imageChecked ? timestamps.map((timestamp, index) => (
               <p className="ml-10 text-[16px] font-normal" key={index}>Matching Face found at: {timestamp}</p>
             )) : " The Face was not Detected!" : " No image choosen yet!"
             }
-          </div>
+          </div> */}
         </div>
         <img
           className="absolute top-[0px] left-[0px] w-[792px] h-[191px]"

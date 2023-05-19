@@ -235,71 +235,58 @@ def realtime():
 
 @app.route('/realtime_detection', methods=['POST'])
 def realtimeDetection():
-    # connect to database
-    mydb = mysql.connector.connect(
-        host="localhost",
-        user="raja",
-        password="1234",
-        database="shubham"
-    )
-    # Create a mycursor object to execute SQL queries
-    mycursor = mydb.cursor()
-
     # Load the input image
     input_image = face_recognition.load_image_file(request.files['image'])
 
-    # Detect faces in the input image
-    input_face_locations = face_recognition.face_locations(input_image)
-    input_face_encodings = face_recognition.face_encodings(
-        input_image, input_face_locations)
+    # Encode the input image
+    input_encoding = face_recognition.face_encodings(input_image)[0]
 
-    # Retrieve known face encodings from the database
-    mycursor.execute("SELECT encoding, timestamp FROM face_encodings")
-    rows = mycursor.fetchall()
+    # Initialize the video capture
+    video_capture = cv2.VideoCapture(0)
 
-    known_encodings = []
-    timestamps = []
-    matchedTimestamps = []
+    # Iterate over frames from the video stream
+    while True:
+        # Capture frame-by-frame
+        ret, frame = video_capture.read()
 
-    for row in rows:
-        encoding_base64 = row[0]
-        timestamp = row[1]
+        # Convert the frame from BGR color (OpenCV default) to RGB color
+        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-        # Decode the base64 string and convert it to face encoding
-        face_encoding = np.frombuffer(
-            base64.b64decode(encoding_base64), dtype=np.float64)
 
-        # Add the face encoding and timestamp to the lists
-        known_encodings.append(face_encoding)
-        timestamps.append(timestamp)
+        # Find all face locations and encodings in the current frame
+        face_locations = face_recognition.face_locations(rgb_frame)
+        face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
 
-    # Compare the input face with known faces
-    for input_face_encoding in input_face_encodings:
-        # Compare the input face encoding with all known face encodings
-        matches = face_recognition.compare_faces(
-            known_encodings, input_face_encoding)
+        # Iterate over the detected faces
+        for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
+            # Compare the face encoding with the input image encoding
+            matches = face_recognition.compare_faces([input_encoding], face_encoding)
+            name = "Unknown"
 
-        # Find the indexes of matching faces
-        matching_indexes = [i for i, match in enumerate(matches) if match]
+            if matches[0]:
+                name = "User"
 
-        for matching_index in matching_indexes:
-            # Retrieve the timestamp for the matching face
-            matching_timestamp = timestamps[matching_index]
-            matchedTimestamps.append((str(timestamps[matching_index])))
+            # Draw a rectangle around the face
+            cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
 
-    print(matchedTimestamps)
-    # Close the database connection
-    mycursor.close()
-    mydb.close()
-    if matching_indexes:
-        response = {
-            'message': "success",
-            'timestamps': matchedTimestamps
-        }
-    else:
-        response = {'message': "failed"}
-    return jsonify(response)
+            # Write the name of the user or "Unknown" on the frame
+            cv2.putText(frame, name, (left, top - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 2)
 
+            # Print a message to the console if the user is found
+            if name != "Unknown":
+                print("User found!")
+
+        # Display the resulting frame
+        cv2.imshow('Video', frame)
+
+        # Break the loop if 'q' is pressed
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    # Release the video capture and close all windows
+    video_capture.release()
+    cv2.destroyAllWindows()
+    return "Success!"
 
 if __name__ == '__main__':
     app.run(host='localhost', port=5000)
