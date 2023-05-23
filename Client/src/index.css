@@ -2,14 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap");
-@import url("https://fonts.googleapis.com/icon?family=Material+Icons"); */
-
-body {
-  @apply leading-[normal] m-0;
-}
-*,
-::before,
-::after {
-  border-width: 0;
+*{
+    font-family: 'Fira Sans', sans-serif;
 }
