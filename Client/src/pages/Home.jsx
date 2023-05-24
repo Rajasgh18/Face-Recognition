@@ -16,8 +16,8 @@ const Home = () => {
       <Navbar />
       <Background id="home" />
       <section className='flex w-full mt-36 h-1/3 py-20 px-10 justify-evenly'>
-        <Model imageUrl="videoCamera.svg" modelPara="Enhancing Safety through Advanced Technology" modelHeading="Unleash the Power of Video Face Tracking in Criminal Detection" modelName="VIDEO FACE TRACKING" />
-        <Model imageUrl="faceCamera.svg" modelPara="Enhancing Security through Real-Time Insights" modelHeading="Empowering Crime Detection with Real-time Face Tracking" modelName="REALTIME FACE TRACKING" />
+        <Model id="video" imageUrl="videoCamera.svg" modelPara="Enhancing Safety through Advanced Technology" modelHeading="Unleash the Power of Video Face Tracking in Criminal Detection" modelName="VIDEO FACE TRACKING" />
+        <Model id="realtime" imageUrl="faceCamera.svg" modelPara="Enhancing Security through Real-Time Insights" modelHeading="Empowering Crime Detection with Real-time Face Tracking" modelName="REALTIME FACE TRACKING" />
         <Model imageUrl="database.svg" modelPara="Unleashing the Potential of Video Face Tracking" modelHeading="Powerful Database for Criminal Detection" modelName="DATABASE STORAGE" />
       </section>
       <section id="features" className='w-full my-24 flex flex-col justify-center items-center'>
