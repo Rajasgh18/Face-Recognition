@@ -11,9 +11,8 @@ const Footer = () => {
                 <div className='flex flex-col text-slate-700 p-5 pt-6 justify-center w-[18%] rounded-tl-[50px] rounded-br-[50px] bg-[#bec3fd]'>
                     <span>Contact Us</span>
                     <span className='text-red-600'>trackflix@gmail.com</span>
-                    <span>+14 2078796254</span>
-                    <span className='w-2/3'>BHilai institute of technolgy
-                        titurdhia,durg,chhattisgarh</span>
+                    <span>+91 9926685773</span>
+                    <span className='w-2/3'>Bhilai institute of technolgy titurdhia,durg,chhattisgarh</span>
                 </div>
             </div>
             <div className='flex w-full px-20 mt-5 items-center justify-between'>

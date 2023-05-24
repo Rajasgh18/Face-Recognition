@@ -8,7 +8,7 @@ git clone https://github.com/Rajasgh18/Face-Recognition.git
 cd client
 
 # Install the required dependencies
-npm i
+npm i or yarn i
 
 # Start the app
-npm start
+npm start or yarn start
