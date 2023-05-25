@@ -8,8 +8,8 @@ import mysql.connector
 # Connect to the MySQL database
 db = mysql.connector.connect(
     host="localhost",
-    user="root",
-    password="Vipin2510@",
+    user="raja",
+    password="1234",
     database="shubham"
 )
 
@@ -58,7 +58,7 @@ while True:
         #match = face_recognition.compare_faces([known_encoding], face_encoding)
         
         # Store the face encoding and timestamp in the database
-        sql = "INSERT INTO face_encodings (encoding, timestamp) VALUES (%s, %s)"
+        sql = "INSERT INTO face_encodings2 (encoding, timestamp) VALUES (%s, %s)"
         val = (face_encoding, current_time)
         cursor.execute(sql, val)
         db.commit()

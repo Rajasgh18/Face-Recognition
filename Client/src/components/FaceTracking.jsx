@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios';
+import './scroll.css';
 
 const FaceTracking = ({ name, id }) => {
 
@@ -23,8 +24,10 @@ const FaceTracking = ({ name, id }) => {
     useEffect(() => {
         if (id === "video")
             file1 && storeImage("detect");
-        else
+        else if (id === "realtime")
             file1 && storeImage("realtime");
+        else
+            file1 && storeImage("database-read");
 
     }, [file1, id]);
 
@@ -61,26 +64,28 @@ const FaceTracking = ({ name, id }) => {
 
     return (
         <aside id={id} className='my-28 flex flex-col items-center justify-center'>
-            <h1 className='text-5xl m-20 font-["Viga"] text-slate-700'>{name} FACE TRACKING</h1>
+            <h1 className='text-5xl m-20 font-["Viga"] text-slate-700'>{name}</h1>
             <div className='w-full flex'>
                 <div className={`w-1/3 p-10 bg-[#8381FD] flex ${id === "video" ? "flex-col-reverse" : "flex-col"} flex-col items-center justify-center`}>
-                    <input onChange={(e) => setFile1(e.target.files[0])} className='hidden' id={`${id === "video" ? "fbtn1" : "rbtn1"}`} type="file" />
-                    <label htmlFor={`${id === "video" ? "fbtn1" : "rbtn1"}`} className='cursor-pointer p-4 bg-[#4A51ED] text-white text-2xl rounded-xl my-8'>Upload Image</label>
-                    <input onChange={(e) => setFile2(e.target.files[0])} className='hidden' id={`${id === "video" ? "fbtn2" : "rbtn2"}`} type="file" />
-                    <label htmlFor={`${id === "video" ? "fbtn2" : "rbtn2"}`} className={`cursor-pointer p-4 bg-[#4A51ED] text-white text-2xl rounded-xl my-8`}>{id === "realtime" ? "Download" : "Upload Video"}</label>
+                    <input onChange={(e) => setFile1(e.target.files[0])} className='hidden' id={`${id === "video" ? "fbtn1" : (id === "realtime" ? "rbtn1" : "dbtn1")}`} type="file" />
+                    {!(id === "database") && <label htmlFor={`${id === "video" ? "fbtn1" : (id === "realtime" ? "rbtn1" : "dbtn2")}`} className='cursor-pointer p-4 bg-[#4A51ED] text-white text-2xl rounded-xl my-8'>Upload Image</label>}
+                    <input onChange={(e) => setFile2(e.target.files[0])} className='hidden' id={`${id === "video" ? "fbtn2" : (id === "realtime" ? "rbtn2" : "dbtn2")}`} type="file" />
+                    <label htmlFor={`${id === "video" ? "fbtn2" : (id === "realtime" ? "rbtn2" : "dbtn1")}`} className={`flex items-center cursor-pointer p-4 bg-[#4A51ED] text-white text-2xl rounded-xl my-8`}><img src="./assets/svgs/tick.gif" className={`${id === "realtime" && file2 != null && frames.length !== 0 ? "" : "hidden"} w-10 h-10 mr-1`} alt="" />{id === "realtime" ? "Download" : (id === "video" ? "Upload Video" : "Upload Image")}</label>
                 </div>
                 <div className='w-1/3 p-14 bg-[#5F64E6] flex items-center justify-center'>
                     <img src="/assets/svgs/faceTracking.svg" alt="" />
                 </div>
-                <div className='w-1/3 p-10 bg-[#2E3E8A] text-slate-300 overflow-y-auto flex flex-col items-center'>
+                <div className='w-1/3 p-10 bg-[#2E3E8A] text-slate-300 flex flex-col items-center'>
                     <h3 className='text-3xl mb-2 text-white'>Timestamp</h3>
-                    {(id === "realtime" && file2) || file1 !== null ? (timestamps.length !== 0 ? timestamps.map((timestamp, index) => (<p key={index}>Face Detected at {timestamp} seconds</p>)) : "No Face Detected!") : "No Image Selected!"}
+                    <div className='h-80 px-3 scrollbar'>
+                        {(id === "realtime" && file2) || file1 !== null ? (timestamps.length !== 0 ? timestamps.map((timestamp, index) => (<p key={index}>{id === "video" ? `Face Detected at ${timestamp} seconds` : timestamp}</p>)) : "No Face Detected!") : "No Image Selected!"}
+                    </div>
                 </div>
             </div>
-            <div className='bg-[#b7b6ff] h-40 flex overflow-x-hidden'>
+            <div className={`mt-4 flex overflow-x-auto`}>
                 {
                     frames?.map(frame => {
-                        return <img src={'/assets/realtimeFrames/'+frame}/>
+                        return <img className='h-36 w-36 rounded-lg mx-2' src={'/assets/realtimeFrames/' + frame} />
                     })
                 }
             </div>

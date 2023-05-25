@@ -4,8 +4,9 @@ const Footer = () => {
     return (
         <footer className='w-full bg-gradient-to-l p-16 px-24 from-[#3641AF] to-[#7773D9] flex flex-col justify-center items-center'>
             <div className='flex items-center'>
-                <img src="/assets/svgs/frLogo.png" className='h-20 w-20 mr-8' alt="" />
-                <h1 className='text-4xl text-white font-["Viga"]'>TRACKFLIX</h1>
+                <img src="/assets/svgs/frLogo.png" className='h-20 w-20' alt="" />
+                <h1 className='text-4xl mx-8 text-white font-["Viga"]'>TRACKFLIX</h1>
+                <img src='/assets/policeLogo.png' className='h-20 w-20 rounded-lg' />
             </div>
             <div className='w-full flex justify-end items-center my-5'>
                 <div className='flex flex-col text-slate-700 p-5 pt-6 justify-center w-[18%] rounded-tl-[50px] rounded-br-[50px] bg-[#bec3fd]'>

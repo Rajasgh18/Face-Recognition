@@ -7,8 +7,8 @@ import base64
 # Connect to the MySQL database
 db = mysql.connector.connect(
     host="localhost",
-    user="root",
-    password="Vipin2510@",
+    user="raja",
+    password="1234",
     database="shubham"
 )
 
@@ -16,7 +16,7 @@ db = mysql.connector.connect(
 cursor = db.cursor()
 
 # Load the input image
-input_image = face_recognition.load_image_file("shubham1.png")
+input_image = face_recognition.load_image_file("Raja.jpeg")
 
 # Detect faces in the input image
 input_face_locations = face_recognition.face_locations(input_image)

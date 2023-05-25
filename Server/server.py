@@ -10,7 +10,9 @@ import mysql.connector
 import os
 from datetime import datetime
 import time
-
+import base64
+import keyboard
+# from pynput import keyboard
 
 app = Flask(__name__)
 CORS(app)
@@ -19,7 +21,6 @@ app.debug = True
 
 
 @app.route('/process_video', methods=['POST'])
-@cross_origin()
 def process_video():
     # connect to database
     mydb = mysql.connector.connect(
@@ -176,7 +177,8 @@ def realtime():
 
         # Find all face locations and encodings in the current frame
         face_locations = face_recognition.face_locations(rgb_frame)
-        face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
+        face_encodings = face_recognition.face_encodings(
+            rgb_frame, face_locations)
 
         # Iterate over the detected faces
         for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
@@ -224,14 +226,15 @@ def realtime():
         response = {
             'message': "success",
             'timestamps': resultList
-    }
+        }
     else:
         response = {'message': "failed"}
     return jsonify(response)
 
+
 @app.route('/realtime-download', methods=["POST"])
 def realtimedown():
-    
+
     # Load the input image
     input_image = face_recognition.load_image_file(request.files['image'])
 
@@ -252,54 +255,49 @@ def realtimedown():
         # Capture frame-by-frame
         ret, frame = video_capture.read()
 
-         # Convert the frame from BGR color (OpenCV default) to RGB color
+        # Convert the frame from BGR color (OpenCV default) to RGB color
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
 
     # Find all face locations and encodings in the current frame
         face_locations = face_recognition.face_locations(rgb_frame)
-        face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
+        face_encodings = face_recognition.face_encodings(
+            rgb_frame, face_locations)
 
     # Iterate over the detected faces
         for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
             # Compare the face encoding with the input image encoding
-            matches = face_recognition.compare_faces([input_encoding], face_encoding)
+            matches = face_recognition.compare_faces(
+                [input_encoding], face_encoding)
             name = "Unknown"
-            result='face not matched'
+            result = 'face not matched'
 
             if matches[0]:
                 name = "User"
                 if face_enter_time is None:
                     face_enter_time = time.ctime()
-                    resultList.append("Face entered at:" + face_enter_time)
+                    timestamp = int(time.time())
+                    filename = f"photo_{timestamp}.jpg"
+                    # Save the frame as an image file
+                    cv2.imwrite(
+                        "../Client/public/assets/realtimeFrames/"+filename, frame)
+                    framesList.append(filename)
 
-            
             # Draw a rectangle around the face
             cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
 
         # Write the name of the user or "Unknown" on the frame
-            cv2.putText(frame, name, (left, top - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 2)
+            cv2.putText(frame, name, (left, top - 10),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 2)
         if face_enter_time is not None and len(face_locations) == 0:
             if face_exit_time is None:
                 face_exit_time = time.ctime()
                 resultList.append("Face exited at:" + face_exit_time)
                 face_enter_time = None
                 face_exit_time = None
-          
+
         # Print a message to the console if the user is found
             if name != "Unknown":
-                result='user found'
-            # Generate a unique filename using timestamp
-                timestamp = int(time.time())
-                filename = f"photo_{timestamp}.jpg"
-            # Save the frame as an image file
-                cv2.imwrite("../Client/public/assets/realtimeFrames/"+filename, frame)
-                framesList.append(filename)
-            #print(f"Photo saved as {filename}!")
-            # Print exit time if the face is no longer detected
-            
-        
-    
+                result = 'user found'
     # Display the resulting frame
         cv2.imshow('Video', frame)
 
@@ -316,10 +314,176 @@ def realtimedown():
             'message': 'success',
             'timestamps': resultList,
             'frames': framesList
-    }
+        }
     else:
         response = {'message': 'failed'}
     return jsonify(response)
+
+
+@app.route('/database-encode', methods=['GET'])
+def databaseEncode():
+    # Connect to the MySQL database
+    db = mysql.connector.connect(
+        host="localhost",
+        user="raja",
+        password="1234",
+        database="shubham"
+    )
+
+    # Create a cursor object to execute SQL queries
+    cursor = db.cursor()
+
+    # Create a table to store face encodings and timestamps
+    cursor.execute(
+        "CREATE TABLE IF NOT EXISTS face_encodings (id INT AUTO_INCREMENT PRIMARY KEY, encoding LONGBLOB, timestamp DATETIME)")
+
+    # Initialize variables
+    timestamps = []
+
+    # Load a sample image for face comparison (optional)
+    # known_image = face_recognition.load_image_file("known_face.jpg")
+    # known_encoding = face_recognition.face_encodings(known_image)[0]
+
+    # Start video capture
+    video_capture = cv2.VideoCapture(0)
+
+    # Check if the camera is opened
+    if not video_capture.isOpened():
+        print("Unable to open camera.")
+        exit()
+
+    # Run the loop until a specific key is pressed
+    while True:
+        # Read each frame of the video
+        ret, frame = video_capture.read()
+
+        if not ret:
+            print("Failed to capture frame.")
+            break
+
+        # Resize the frame to improve processing speed (optional)
+        small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
+
+        # Convert the frame from BGR to RGB
+        rgb_frame = cv2.cvtColor(small_frame, cv2.COLOR_BGR2RGB)
+
+        # Detect faces in the frame
+        face_locations = face_recognition.face_locations(rgb_frame)
+
+        if face_locations:
+            # Encode the faces in the frame
+            face_encodings = face_recognition.face_encodings(
+                rgb_frame, face_locations)
+
+            # Get the current timestamp
+            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+            for face_encoding in face_encodings:
+                # Store the face encoding and timestamp in the database
+                sql = "INSERT INTO face_encodings (encoding, timestamp) VALUES (%s, %s)"
+                val = (face_encoding.tobytes(), current_time)
+                cursor.execute(sql, val)
+                db.commit()
+
+                # Add the timestamp to the timestamps array
+                timestamps.append(current_time)
+
+        # Display the resulting image with face rectangles
+        for (top, right, bottom, left) in face_locations:
+            # Scale back the face locations to the original size
+            top *= 4
+            right *= 4
+            bottom *= 4
+            left *= 4
+
+            # Draw a rectangle around the face
+            cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
+
+        # Display the resulting image
+        # cv2.imshow('Video', frame)
+
+        # Check if the specified key is pressed to break the loop
+        # pressed = False
+        # def onPress(key):
+        #     if key == keyboard.Key.esc:
+        #         # Stop listener
+        #         pressed = True
+        #         return
+        # with keyboard.Listener(on_press=onPress) as listener: 
+        #     listener.join()
+        if keyboard.is_pressed('esc'):  # Change 'esc' to the desired key
+            break
+
+    # Release the video capture and close the windows
+    video_capture.release()
+    cv2.destroyAllWindows()
+
+    # Close the database connection
+    cursor.close()
+    db.close()
+    return {"message": "closed"}
+
+
+@app.route('/database-read', methods=['POST'])
+def databaseRead():
+    # Connect to the MySQL database
+    db = mysql.connector.connect(
+        host="localhost",
+        user="raja",
+        password="1234",
+        database="shubham"
+    )
+
+    # Create a cursor object to execute SQL queries
+    cursor = db.cursor()
+
+    # Load the input image
+    input_image = face_recognition.load_image_file(request.files['image'])
+
+    # Detect faces in the input image
+    input_face_locations = face_recognition.face_locations(input_image)
+    input_face_encodings = face_recognition.face_encodings(input_image, input_face_locations)
+
+    # Retrieve known face encodings from the database
+    cursor.execute("SELECT encoding, timestamp FROM face_encodings")
+    rows = cursor.fetchall()
+
+    known_encodings = []
+    timestamps = []
+    matchedTimestamps = []
+
+    for row in rows:
+        encoding = np.frombuffer(row[0], dtype=np.float64)
+        timestamp = row[1]
+        
+        # Add the face encoding and timestamp to the lists
+        known_encodings.append(encoding)
+        timestamps.append(timestamp)
+
+    # Compare the input face with known faces
+    for input_face_encoding in input_face_encodings:
+        # Compare the input face encoding with all known face encodings
+        matches = face_recognition.compare_faces(known_encodings, input_face_encoding)
+        
+        # Find the indexes of matching faces
+        matching_indexes = [i for i, match in enumerate(matches) if match]
+        
+        for matching_index in matching_indexes:
+            # Retrieve the timestamp for the matching face
+            matching_timestamp = timestamps[matching_index]
+            matchedTimestamps.append(f"Matching face found at: {matching_timestamp}")
+
+    # Close the database connection
+    cursor.close()
+    db.close()
+
+    if len(matchedTimestamps) != 0:
+        return {
+            'message': 'success',
+            'timestamps': matchedTimestamps
+        }
+    else:
+        return {'message': 'failed'}
 
 if __name__ == '__main__':
     app.run(host='localhost', port=5000)
