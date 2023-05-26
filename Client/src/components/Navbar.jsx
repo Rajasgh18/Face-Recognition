@@ -6,7 +6,7 @@ const Navbar = () => {
     if (enabled) {
       setEnabled(false);
       const event = new KeyboardEvent('keydown', { key: 'esc' });
-      console.log(event)
+      event;
     }
     else {
       setEnabled(true);

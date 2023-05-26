@@ -10,7 +10,6 @@ import mysql.connector
 import os
 from datetime import datetime
 import time
-import base64
 import keyboard
 # from pynput import keyboard
 
