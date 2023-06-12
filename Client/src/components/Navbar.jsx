@@ -1,12 +1,14 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import axios from 'axios';
 const Navbar = () => {
   const [enabled, setEnabled] = useState(false);
   const handleClick = async () => {
     if (enabled) {
       setEnabled(false);
-      const event = new KeyboardEvent('keydown', { key: 'esc' });
-      event;
+      const event = new KeyboardEvent('keydown', {
+        key: 'Escape', // Specify the keyboard button you want to simulate
+      });
+      document.dispatchEvent(event);
     }
     else {
       setEnabled(true);

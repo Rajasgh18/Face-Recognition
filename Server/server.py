@@ -2,7 +2,7 @@ import os
 from flask import Flask, Response, request, jsonify
 from flask_cors import CORS, cross_origin
 from PIL import Image
-from io import StringIO
+from io import BytesIO
 import cv2
 import numpy as np
 import face_recognition
@@ -11,10 +11,13 @@ import os
 from datetime import datetime
 import time
 import keyboard
+from flask_socketio import SocketIO, emit
+import base64
 # from pynput import keyboard
 
 app = Flask(__name__)
 CORS(app)
+socketio = SocketIO(app, cors_allowed_origins="http://localhost:5173")
 
 app.debug = True
 
@@ -232,39 +235,27 @@ def realtime():
 
 
 @app.route('/realtime-download', methods=["POST"])
-def realtimedown():
-
-    # Load the input image
+def realtimeDown():
     input_image = face_recognition.load_image_file(request.files['image'])
-
-    # Encode the input image
     input_encoding = face_recognition.face_encodings(input_image)[0]
 
-    # Initialize the video capture
     video_capture = cv2.VideoCapture(0)
 
-    # Initialize the variables for tracking face entry and exit time
     face_enter_time = None
     face_exit_time = None
     framesList = []
     resultList = []
 
-    # Iterate over frames from the video stream
     while True:
-        # Capture frame-by-frame
         ret, frame = video_capture.read()
 
-        # Convert the frame from BGR color (OpenCV default) to RGB color
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-    # Find all face locations and encodings in the current frame
         face_locations = face_recognition.face_locations(rgb_frame)
         face_encodings = face_recognition.face_encodings(
             rgb_frame, face_locations)
 
-    # Iterate over the detected faces
         for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
-            # Compare the face encoding with the input image encoding
             matches = face_recognition.compare_faces(
                 [input_encoding], face_encoding)
             name = "Unknown"
@@ -276,15 +267,12 @@ def realtimedown():
                     face_enter_time = time.ctime()
                     timestamp = int(time.time())
                     filename = f"photo_{timestamp}.jpg"
-                    # Save the frame as an image file
                     cv2.imwrite(
                         "../Client/public/assets/realtimeFrames/"+filename, frame)
                     framesList.append(filename)
 
-            # Draw a rectangle around the face
             cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
 
-        # Write the name of the user or "Unknown" on the frame
             cv2.putText(frame, name, (left, top - 10),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 2)
         if face_enter_time is not None and len(face_locations) == 0:
@@ -294,17 +282,14 @@ def realtimedown():
                 face_enter_time = None
                 face_exit_time = None
 
-        # Print a message to the console if the user is found
             if name != "Unknown":
                 result = 'user found'
-    # Display the resulting frame
+
         cv2.imshow('Video', frame)
 
-    # Break the loop if 'q' is pressed
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
-# Release the video capture and close all windows
     video_capture.release()
     cv2.destroyAllWindows()
 
@@ -317,6 +302,77 @@ def realtimedown():
     else:
         response = {'message': 'failed'}
     return jsonify(response)
+
+
+@app.route('/realtime-detection', methods=["POST"])
+def realtimedetect():
+    def generate():
+        input_image = face_recognition.load_image_file(request.files['image'])
+        input_encoding = face_recognition.face_encodings(input_image)[0]
+
+        video_capture = cv2.VideoCapture(0)
+
+        face_enter_time = None
+        face_exit_time = None
+        framesList = []
+        resultList = []
+
+        while True:
+            ret, frame = video_capture.read()
+            rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+            face_locations = face_recognition.face_locations(rgb_frame)
+            face_encodings = face_recognition.face_encodings(
+                rgb_frame, face_locations)
+
+            for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
+                matches = face_recognition.compare_faces(
+                    [input_encoding], face_encoding)
+                name = "Unknown"
+                result = 'face not matched'
+
+                if matches[0]:
+                    name = "User"
+                    if face_enter_time is None:
+                        face_enter_time = time.ctime()
+                        timestamp = int(time.time())
+                        filename = f"photo_{timestamp}.jpg"
+                        cv2.imwrite(
+                            "../Client/public/assets/realtimeFrames/" + filename, frame)
+                        framesList.append(filename)
+
+                    cv2.rectangle(frame, (left, top),
+                                  (right, bottom), (0, 0, 255), 2)
+                    cv2.putText(frame, name, (left, top - 10),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 2)
+
+            if face_enter_time is not None and len(face_locations) == 0:
+                if face_exit_time is None:
+                    face_exit_time = time.ctime()
+                    resultList.append("Face exited at:" + face_exit_time)
+                    face_enter_time = None
+                    face_exit_time = None
+
+                    if name != "Unknown":
+                        result = 'user found'
+
+            cv2.imshow('Video', frame)
+
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
+            if len(resultList) != 0:
+                response = {
+                    'message': 'success',
+                    'timestamps': resultList,
+                    'frames': framesList
+                }
+            else:
+                response = {'message': 'failed'}
+
+            yield f"data: {response}\n\n"
+
+    return Response(generate(), mimetype='text/event-stream')
 
 
 @app.route('/database-encode', methods=['GET'])
@@ -408,7 +464,7 @@ def databaseEncode():
         #         # Stop listener
         #         pressed = True
         #         return
-        # with keyboard.Listener(on_press=onPress) as listener: 
+        # with keyboard.Listener(on_press=onPress) as listener:
         #     listener.join()
         if keyboard.is_pressed('esc'):  # Change 'esc' to the desired key
             break
@@ -441,7 +497,8 @@ def databaseRead():
 
     # Detect faces in the input image
     input_face_locations = face_recognition.face_locations(input_image)
-    input_face_encodings = face_recognition.face_encodings(input_image, input_face_locations)
+    input_face_encodings = face_recognition.face_encodings(
+        input_image, input_face_locations)
 
     # Retrieve known face encodings from the database
     cursor.execute("SELECT encoding, timestamp FROM face_encodings")
@@ -454,7 +511,7 @@ def databaseRead():
     for row in rows:
         encoding = np.frombuffer(row[0], dtype=np.float64)
         timestamp = row[1]
-        
+
         # Add the face encoding and timestamp to the lists
         known_encodings.append(encoding)
         timestamps.append(timestamp)
@@ -462,15 +519,17 @@ def databaseRead():
     # Compare the input face with known faces
     for input_face_encoding in input_face_encodings:
         # Compare the input face encoding with all known face encodings
-        matches = face_recognition.compare_faces(known_encodings, input_face_encoding)
-        
+        matches = face_recognition.compare_faces(
+            known_encodings, input_face_encoding)
+
         # Find the indexes of matching faces
         matching_indexes = [i for i, match in enumerate(matches) if match]
-        
+
         for matching_index in matching_indexes:
             # Retrieve the timestamp for the matching face
             matching_timestamp = timestamps[matching_index]
-            matchedTimestamps.append(f"Matching face found at: {matching_timestamp}")
+            matchedTimestamps.append(
+                f"Matching face found at: {matching_timestamp}")
 
     # Close the database connection
     cursor.close()
@@ -484,5 +543,85 @@ def databaseRead():
     else:
         return {'message': 'failed'}
 
+
+@socketio.on('connect')
+def handle_connect():
+    print('Client connected')
+
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    print('Client disconnected')
+
+
+@socketio.on('realtime_down')
+def handle_realtime_down(data):
+    input_image = face_recognition.load_image_file(data)
+    input_encoding = face_recognition.face_encodings(input_image)[0]
+
+    video_capture = cv2.VideoCapture(0)
+
+    face_enter_time = None
+    face_exit_time = None
+
+    while True:
+        ret, frame = video_capture.read()
+
+        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+        face_locations = face_recognition.face_locations(rgb_frame)
+        face_encodings = face_recognition.face_encodings(
+            rgb_frame, face_locations)
+
+        for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
+            matches = face_recognition.compare_faces(
+                [input_encoding], face_encoding)
+            name = "Unknown"
+
+            if matches[0]:
+                name = "User"
+                if face_enter_time is None:
+                    face_enter_time = time.ctime()
+                    timestamp = int(time.time())
+                    socketio.emit('face_detected', {
+                                  'timestamp': face_enter_time})
+
+            cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
+            cv2.putText(frame, name, (left, top - 10),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 2)
+
+        if face_enter_time is not None and len(face_locations) == 0:
+            if face_exit_time is None:
+                face_exit_time = time.ctime()
+                socketio.emit('face_detected', {'timestamp': face_exit_time})
+                print(face_exit_time)
+                face_enter_time = None
+                face_exit_time = None
+
+        # Convert the frame to JPEG format
+        ret, jpeg = cv2.imencode('.jpg', frame)
+        # Encode the JPEG image as base64 string
+        frame_base64 = base64.b64encode(jpeg.tobytes()).decode('utf-8')
+
+        # Emit the base64-encoded frame to the client
+        socketio.emit('video_frame', {'frame': frame_base64})
+
+    video_capture.release()
+
+@socketio.on('video_frame')
+def process_video_frame(data):
+    frame_data = data['frame']
+    frame_bytes = base64.b64decode(frame_data.split(',')[1])
+    nparr = np.frombuffer(frame_bytes, np.uint8)
+    frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    face_locations = face_recognition.face_locations(rgb_frame)
+
+    if len(face_locations) > 0:
+        timestamp = int(time.time())
+        socketio.emit('face_detected', {'timestamps': timestamp})
+
+
 if __name__ == '__main__':
-    app.run(host='localhost', port=5000)
+    socketio.run(app, host='localhost', port=5000)

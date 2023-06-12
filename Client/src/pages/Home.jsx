@@ -6,6 +6,7 @@ import About from '../components/About';
 import Footer from '../components/Footer';
 import Model from '../components/Model';
 import Background from '../components/Background';
+import Realtime from '../components/Realtime';
 const Home = () => {
   const para1 = "Our video/webcam face tracking technology utilizes advanced facial recognition algorithms to accurately detect and identify individuals. This feature enables law enforcement agencies and security professionals to match faces against databases of known criminals, aiding in the swift identification and apprehension of suspects."
   const para2 = "With our real-time tracking and alert system, our video/webcam face tracking technology provides immediate notifications when a person of interest is detected. This feature allows security personnel to respond rapidly and take proactive measures to prevent crimes or intervene in time-critical situations."
@@ -32,7 +33,7 @@ const Home = () => {
         <FaceTracking id="video" name="VIDEO FACE TRACKING" />
         <FaceTracking id="realtime" name="REALTIME FACE TRACKING" />
         <FaceTracking id="database" name="DATABASE STORAGE" />
-        {/* <Database/> */}
+        <Realtime/>
       </section>
       <About id="about" />
       <Footer />

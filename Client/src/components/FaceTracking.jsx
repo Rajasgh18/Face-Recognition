@@ -84,8 +84,8 @@ const FaceTracking = ({ name, id }) => {
             </div>
             <div className={`mt-4 flex overflow-x-auto`}>
                 {
-                    frames?.map(frame => {
-                        return <img className='h-36 w-36 rounded-lg mx-2' src={'/assets/realtimeFrames/' + frame} />
+                    frames?.map((frame, index) => {
+                        return <img key={index} className='h-36 w-36 rounded-lg mx-2' src={'/assets/realtimeFrames/' + frame} />
                     })
                 }
             </div>
