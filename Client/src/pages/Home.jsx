@@ -33,7 +33,7 @@ const Home = () => {
         <FaceTracking id="video" name="VIDEO FACE TRACKING" />
         <FaceTracking id="realtime" name="REALTIME FACE TRACKING" />
         <FaceTracking id="database" name="DATABASE STORAGE" />
-        <Realtime/>
+        {/* <Realtime/> */}
       </section>
       <About id="about" />
       <Footer />
