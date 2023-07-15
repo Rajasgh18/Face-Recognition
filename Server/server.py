@@ -624,4 +624,5 @@ def process_video_frame(data):
 
 
 if __name__ == '__main__':
-    socketio.run(app, host='localhost', port=5000)
+    # socketio.run(app, host="localhost", port=5000)
+    app.run()
