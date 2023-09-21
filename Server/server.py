@@ -10,11 +10,13 @@ import mysql.connector
 import os
 from datetime import datetime
 import time
+from flask_socketio import SocketIO, emit
 import keyboard
 # from pynput import keyboard
 
 app = Flask(__name__)
 CORS(app)
+socketio = SocketIO(app, cors_allowed_origins="http://localhost:5173")
 
 app.debug = True
 
@@ -279,6 +281,8 @@ def realtimedown():
                     # Save the frame as an image file
                     cv2.imwrite(
                         "../Client/public/assets/realtimeFrames/"+filename, frame)
+                    socketio.emit('face_detected_frame', {
+                                  'frameName': filename})
                     framesList.append(filename)
 
             # Draw a rectangle around the face
@@ -291,6 +295,8 @@ def realtimedown():
             if face_exit_time is None:
                 face_exit_time = time.ctime()
                 resultList.append("Face exited at:" + face_exit_time)
+                print(face_exit_time)
+                socketio.emit('face_detected', {'timestamp': face_exit_time})
                 face_enter_time = None
                 face_exit_time = None
 
@@ -408,7 +414,7 @@ def databaseEncode():
         #         # Stop listener
         #         pressed = True
         #         return
-        # with keyboard.Listener(on_press=onPress) as listener: 
+        # with keyboard.Listener(on_press=onPress) as listener:
         #     listener.join()
         if keyboard.is_pressed('esc'):  # Change 'esc' to the desired key
             break
@@ -441,7 +447,8 @@ def databaseRead():
 
     # Detect faces in the input image
     input_face_locations = face_recognition.face_locations(input_image)
-    input_face_encodings = face_recognition.face_encodings(input_image, input_face_locations)
+    input_face_encodings = face_recognition.face_encodings(
+        input_image, input_face_locations)
 
     # Retrieve known face encodings from the database
     cursor.execute("SELECT encoding, timestamp FROM face_encodings")
@@ -454,7 +461,7 @@ def databaseRead():
     for row in rows:
         encoding = np.frombuffer(row[0], dtype=np.float64)
         timestamp = row[1]
-        
+
         # Add the face encoding and timestamp to the lists
         known_encodings.append(encoding)
         timestamps.append(timestamp)
@@ -462,15 +469,17 @@ def databaseRead():
     # Compare the input face with known faces
     for input_face_encoding in input_face_encodings:
         # Compare the input face encoding with all known face encodings
-        matches = face_recognition.compare_faces(known_encodings, input_face_encoding)
-        
+        matches = face_recognition.compare_faces(
+            known_encodings, input_face_encoding)
+
         # Find the indexes of matching faces
         matching_indexes = [i for i, match in enumerate(matches) if match]
-        
+
         for matching_index in matching_indexes:
             # Retrieve the timestamp for the matching face
             matching_timestamp = timestamps[matching_index]
-            matchedTimestamps.append(f"Matching face found at: {matching_timestamp}")
+            matchedTimestamps.append(
+                f"Matching face found at: {matching_timestamp}")
 
     # Close the database connection
     cursor.close()
@@ -483,6 +492,7 @@ def databaseRead():
         }
     else:
         return {'message': 'failed'}
+
 
 if __name__ == '__main__':
     app.run()
