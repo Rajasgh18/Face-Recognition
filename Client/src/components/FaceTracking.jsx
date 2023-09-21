@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios';
 import './scroll.css';
+import io from 'socket.io-client';
+
+const socket = io('http://localhost:5000');
 
 const FaceTracking = ({ name, id }) => {
 
@@ -62,6 +65,17 @@ const FaceTracking = ({ name, id }) => {
         file2 && storeVideo();
     }, [file2]);
 
+    useEffect(() => {
+        socket.on('face_detected', (data) => {
+            const { timestamps } = data;
+            setTimestamps(prev => [...prev, Date(timestamps)]);
+        });
+        socket.on('face_detected_frame', (data) => {
+            const { frameName } = data;
+            setFrames(prev => [...prev, frameName])
+        })
+    }, [socket]);
+
     return (
         <aside id={id} className='my-28 flex flex-col items-center justify-center'>
             <h1 className='text-5xl m-20 font-["Viga"] text-slate-700'>{name}</h1>
@@ -82,9 +96,10 @@ const FaceTracking = ({ name, id }) => {
                     </div>
                 </div>
             </div>
-            <div className={`mt-4 flex overflow-x-auto`}>
+            <div className={`mt-4 p-2 flex overflow-x-auto`}>
                 {
-                    frames?.map(frame => {
+                    frames.length !== 0 && frames.map(frame => {
+                        console.log(frame)
                         return <img className='h-36 w-36 rounded-lg mx-2' src={'/assets/realtimeFrames/' + frame} />
                     })
                 }
