@@ -12,10 +12,11 @@ const Home = () => {
   const para3 = "We understand the importance of privacy, and our video/webcam face tracking technology is designed with robust privacy protection measures. Facial data is securely stored, and access is strictly controlled, ensuring compliance with privacy regulations and safeguarding sensitive information."
 
   return (
-    <div className='h-screen'>
+    <section className='min-h-screen flex flex-col'>
       <Navbar />
+      <section>
       <Background id="home" />
-      <section className='flex w-full mt-36 h-1/3 py-20 px-10 justify-evenly'>
+      <section className='flex w-full mt-36 h-1/3 px-10 justify-evenly'>
         <Model id="video" imageUrl="videoCamera.svg" modelPara="Enhancing Safety through Advanced Technology" modelHeading="Unleash the Power of Video Face Tracking in Criminal Detection" modelName="VIDEO FACE TRACKING" />
         <Model id="realtime" imageUrl="faceCamera.svg" modelPara="Enhancing Security through Real-Time Insights" modelHeading="Empowering Crime Detection with Real-time Face Tracking" modelName="REALTIME FACE TRACKING" />
         <Model id="database" imageUrl="database.svg" modelPara="Unleashing the Potential of Video Face Tracking" modelHeading="Powerful Database for Criminal Detection" modelName="DATABASE STORAGE" />
@@ -32,11 +33,11 @@ const Home = () => {
         <FaceTracking id="video" name="VIDEO FACE TRACKING" />
         <FaceTracking id="realtime" name="REALTIME FACE TRACKING" />
         <FaceTracking id="database" name="DATABASE STORAGE" />
-        {/* <Database/> */}
       </section>
       <About id="about" />
+      </section>
       <Footer />
-    </div>
+    </section>
   )
 }
 

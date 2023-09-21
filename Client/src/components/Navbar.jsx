@@ -25,7 +25,7 @@ const Navbar = () => {
   };
 
   return (
-    <div className='h-14 px-20 flex justify-between items-center w-full z-50 bg-gradient-to-r from-[#9d9ffe] to-[#7a90fe]'>
+    <div className='h-14 px-20 flex justify-between sticky top-0 items-center w-full z-50 bg-gradient-to-r from-[#9d9ffe] to-[#7a90fe]'>
       <img src="./assets/svgs/frLogo.png" className='h-10 bg-blue-400 text-blue-400 fill-blue-400' alt="" />
       <div className="font-['Viga'] flex items-center text-white">
         <button onClick={() => { scrollToSection('home') }} className='mx-4 transition-all duration-200 hover:text-red-600 font-inherit'>HOME</button>
