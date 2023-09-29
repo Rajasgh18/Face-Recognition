@@ -98,10 +98,10 @@ const FaceTracking = ({ name, id }) => {
             </div>
             <div className={`mt-4 p-2 flex overflow-x-auto`}>
                 {
-                    frames.length !== 0 && frames.map(frame => {
+                    id === "realtime" && (frames.length !== 0 && frames.map(frame => {
                         console.log(frame)
                         return <img className='h-36 w-36 rounded-lg mx-2' src={'/assets/realtimeFrames/' + frame} />
-                    })
+                    }))
                 }
             </div>
         </aside>
