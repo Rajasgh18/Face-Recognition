@@ -243,7 +243,7 @@ def realtimedown():
     input_encoding = face_recognition.face_encodings(input_image)[0]
 
     # Initialize the video capture
-    camera_sources = [0]
+    camera_sources = ["http://100.95.160.88:4747/video"]
     # video_capture = cv2.VideoCapture([0, "http://192.168.165.198:4747/video"])
     captures = [cv2.VideoCapture(source) for source in camera_sources]
     # Initialize the variables for tracking face entry and exit time
@@ -256,6 +256,7 @@ def realtimedown():
     while True:
         # Capture frame-by-frame
         for video_capture in captures:
+            print(video_capture)
             video_capture.set(cv2.CAP_PROP_FPS, 1)
             print(video_capture)
             ret, frame = video_capture.read()
@@ -310,10 +311,7 @@ def realtimedown():
                 if name != "Unknown":
                     result = 'user found'
         # Display the resulting frame
-            # if video_capture == 'http://192.168.165.198:4747/video':
-            cv2.imshow('Video1', frame)
-            # else:
-            #     cv2.imshow('Video2', frame)
+            cv2.imshow('Video2', frame)
 
         # Break the loop if 'q' is pressed
         if cv2.waitKey(1) & 0xFF == ord('q'):
