@@ -3,7 +3,7 @@ import axios from 'axios';
 import './scroll.css';
 import io from 'socket.io-client';
 
-const socket = io('http://localhost:5000');
+const socket = io('trackflix-eojtwqrsz-rajasgh18.vercel.app');
 
 const FaceTracking = ({ name, id }) => {
 
@@ -16,7 +16,7 @@ const FaceTracking = ({ name, id }) => {
         const formData = new FormData();
         formData.append('image', file1);
         try {
-            const response = await axios.post(`http://localhost:5000/${urlName}`, formData);
+            const response = await axios.post(`trackflix-eojtwqrsz-rajasgh18.vercel.app/${urlName}`, formData);
             if (response.data.message === "success")
                 setTimestamps(response.data.timestamps);
         } catch (error) {
@@ -39,7 +39,7 @@ const FaceTracking = ({ name, id }) => {
             const formData = new FormData();
             formData.append('videoFile', file2);
             try {
-                const response = await axios.post(`http://localhost:5000/process_video`, formData);
+                const response = await axios.post(`trackflix-eojtwqrsz-rajasgh18.vercel.app/process_video`, formData);
                 console.log(response);
             } catch (error) {
                 console.error(error)
@@ -53,7 +53,7 @@ const FaceTracking = ({ name, id }) => {
             const formData = new FormData();
             formData.append('image', file2);
             try {
-                const response = await axios.post(`http://localhost:5000/realtime-download`, formData);
+                const response = await axios.post(`trackflix-eojtwqrsz-rajasgh18.vercel.app/realtime-download`, formData);
                 if (response.data.message === "success") {
                     setTimestamps(response.data.timestamps);
                     setFrames(response.data.frames);
