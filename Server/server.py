@@ -513,5 +513,9 @@ def media_pipe():
     print("Success")
     return "Success"
 
+@app.route('/', methods=['GET'])
+def index():
+    return "Welcome to Trackflix API!"
+
 if __name__ == '__main__':
     app.run()
